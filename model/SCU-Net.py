@@ -91,14 +91,14 @@ class Fuse(nn.Module):
 class ContextBlock(nn.Module):
     def __init__(self,in_ch, out_ch, dilation_rate=2, reduction=16):
         super(ContextBlock, self).__init__()
-        self.conv1x1 = ConvBNPReLU(in_ch, out_ch, 3, 2)  #  size/2, channel: nIn--->nOut
+        self.conv1x1 = ConvBNPReLU(in_ch, out_ch, 3, 2)
         
         self.F_loc = ChannelWiseConv(in_ch, out_ch, 3, 1)
         self.F_sur = ChannelWiseDilatedConv(in_ch, out_ch, 3, 1, dilation_rate)
         
         self.bn = nn.BatchNorm2d(2*out_ch, eps=1e-3)
         self.act = nn.PReLU(2*out_ch)
-        self.reduce = Conv(2*out_ch, out_ch,1,1)  #reduce dimension: 2*nOut--->nOut
+        self.reduce = Conv(2*out_ch, out_ch,1,1) 
         
         self.F_glo = Fuse(out_ch, reduction)    
 
@@ -107,12 +107,12 @@ class ContextBlock(nn.Module):
         loc = self.F_loc(x)
         sur = self.F_sur(x)
 
-        joi_feat = torch.cat([loc, sur],1)  #  the joint feature
+        joi_feat = torch.cat([loc, sur],1) 
         joi_feat = self.bn(joi_feat)
         joi_feat = self.act(joi_feat)
-        joi_feat = self.reduce(joi_feat)     #channel= nOut
+        joi_feat = self.reduce(joi_feat)    
         
-        output = self.F_glo(joi_feat)  # F_glo is employed to refine the joint feature
+        output = self.F_glo(joi_feat) 
 
         return output
 
@@ -189,32 +189,35 @@ class outconv(nn.Module):
 class SCU-Net(nn.Module):
     def __init__(self, classes = 1):
         super(SCU-Net, self).__init__()
-        self.level1_0 = ConvBNPReLU(3, 16, 3, 2)
-        self.level1_1 = ConvBNPReLU(16, 16, 3, 1)                          
-        self.level1_2 = ConvBNPReLU(16, 16, 3, 1)
-        self.level2_0 = ContextBlock(16 + 3, 32, dilation_rate=2,reduction=8) 
-        self.level3_0 = ContextBlock(32+3, 64, dilation_rate=4,reduction=16)
+        
+        self.conv1 = ConvBNPReLU(3, 16, 3, 2)
+        self.conv2 = ConvBNPReLU(16, 16, 3, 1)                          
+        self.conv3 = ConvBNPReLU(16, 16, 3, 1)
+        
+        self.cb1 = ContextBlock(16 + 3, 32, dilation_rate=2,reduction=8) 
+        self.cb2 = ContextBlock(32+3, 64, dilation_rate=4,reduction=16)
         
         self.b1 = BNPReLU(16 + 3)
         self.b2 = BNPReLU(32 + 3)
         
-        self.sample1 = InputInjection(1)  #down-sample for Input Injection, factor=2
-        self.sample2 = InputInjection(2)  #down-sample for Input Injiection, factor=4
+        self.sample1 = InputInjection(1) 
+        self.sample2 = InputInjection(2)  
         
         self.up3 = up(96, 64)
         self.up4 = up(80, 32)
+        
         self.outc = outconv(32, classes)
         
     def forward(self, x):
-        output0 = self.level1_0(x)
-        output0 = self.level1_1(output0)
-        output0 = self.level1_2(output0)
+        output0 = self.conv1(x)
+        output0 = self.conv2(output0)
+        output0 = self.conv3(output0)
         down1 = self.sample1(x)
         down2 = self.sample2(x)
         output0_cat = self.b1(torch.cat([output0, down1], 1))
-        output1 = self.level2_0(output0_cat)
+        output1 = self.cb1(output0_cat)
         output1_cat = self.b2(torch.cat([output1, down2], 1))
-        output2 = self.level3_0(output1_cat) 
+        output2 = self.cb2(output1_cat) 
         up1 = self.up3(output2, output1)
         up2 = self.up4(up1, output0)
         up3 = F.interpolate(up2, scale_factor=2, mode='bilinear', align_corners=True)
@@ -227,4 +230,4 @@ if __name__ == '__main__':
     model = SCU-Net(classes=1).to(device)
     x = torch.randn(1, 3, 512, 512).cuda()
     model(x)
-#     summary(model,(3,512,512))
+
