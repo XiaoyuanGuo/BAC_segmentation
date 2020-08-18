@@ -7,8 +7,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchsummary import summary
 
-__all__ = ["SCU-Net"]
-
 class ConvBNPReLU(nn.Module):
     def __init__(self,in_ch, out_ch,  kSize, stride=1):
         super(ConvBNPReLU, self).__init__()
