@@ -1,9 +1,9 @@
-# BAC_segmentation
+## SCU-Net: A deep learning method for segmentation and quantification of breast arterial calcifications on mammograms
 
 Code for breast arterial calcifications segmentation on mammograms of the following paper: SCU-Net: A deep learning method for segmentation and quantification of breast arterial calcifications on mammograms (https://pubmed.ncbi.nlm.nih.gov/34328661/, https://www.medrxiv.org/content/10.1101/2021.07.30.21261406v1.full.pdf).
 
 
-# Usage:
+## Usage:
 
 Download the code:
 
@@ -21,8 +21,9 @@ To train the model:
 ``` shell
 python main.py
 ``` 
+### An evaluation version of SCU-Net can be found: https://github.com/Emory-HITI/BAC_segmentation
 
-## Cite SCU-Net
+### Cite SCU-Net
 
 If you use this repository or would like to refer the paper, please use the following BibTeX entry
 ```
