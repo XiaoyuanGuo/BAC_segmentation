@@ -13,7 +13,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset, DataLoader
 from utils import dice_loss, evaluate
-from model.SC-UNet import SCG-Net
+from model.SCU_Net import SCU_Net
 from PIL import Image, ImageEnhance
 from dataset import MammoDataset_Normalized as MammoDataset
 Image_Size = [512, 512]
@@ -92,7 +92,7 @@ def train(net, epochs, trainloader , valloader, optimizer, is_gpu, bestdice, Net
       
         
 def main():
-    Net = "SCU-Net"
+    Net = "SCU_Net"
     train_tfms = transforms.Compose([
                                      transforms.ColorJitter(brightness=0.2, saturation=0.3, hue=0.25),
                                      transforms.ToTensor(),
@@ -116,7 +116,7 @@ def main():
         is_gpu = True
     else:
         is_gpu = False 
-    net = SCU-Net(classes=1)
+    net = SCU_Net(classes=1)
     net = net.double()
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
